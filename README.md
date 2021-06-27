@@ -3,7 +3,7 @@ personal api server template on fastapi
 
 ## How to execute
 ```shell
-uvicorn server:app --reload
+uvicorn server:app --reload --port 5000
 ```
 
 ## How to test
