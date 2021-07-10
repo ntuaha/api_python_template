@@ -12,7 +12,7 @@ def main():
         }
         url = f'http://localhost:8888/aha.test1?json={json.dumps(data)}'
         r = requests.get(url)
-        time.sleep(random.random()/2)
+        time.sleep(random.random()/5)
     print(r.status_code)
     print(url)
 
