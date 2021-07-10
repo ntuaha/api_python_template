@@ -1,0 +1,51 @@
+version: "3.2"
+services:
+  elasticsearch:
+    image: elasticsearch:7.13.3
+    volumes:
+      - type: bind
+        source: ./config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: bind
+        source:  ./volumn/elasticsearch
+        target: /usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: changeme
+      discovery.type: single-node
+    networks:
+      - elk
+  fluentd:
+    image: yowko/fluentd-elasticsearch:1.0.0
+    volumes:
+      - type: bind
+        source: ./config/fluent.conf
+        target: /fluentd/etc/fluent.conf
+    ports:
+      - "24224:24224/tcp"
+      - "24224:24224/udp"
+      - "8888:8888"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+  kibana:
+    image: kibana:7.13.3
+    volumes:
+      - type: bind
+        source: ./config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+networks:
+  elk:
+    driver: bridge
