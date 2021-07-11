@@ -15,6 +15,24 @@ sudo -H pip3 install -r requirement.txt
 PYTHONPATH=`pwd` pytest
 ```
 
+
+## 安裝 docker
+
+ref: https://blog.gtwang.org/virtualization/ubuntu-linux-install-docker-tutorial/
+
+```shell
+# 安裝 docker 
+sudo apt-get install docker.io
+# 確認服務
+service docker status
+# 加入帳號到 docker group
+sudo groupadd docker
+# sudo usermod -aG docker ntuaha
+sudo usermod -aG docker $USER
+# 確認 docker version
+docker version
+```
+
 ## install docker-compose
 
 ref: https://docs.docker.com/compose/install/
