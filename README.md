@@ -55,3 +55,19 @@ docker-compose -f docker-compose.yml up -d --remove-orphans
 
 3. 連線到 kibana http://localhost:5601
 4. 送資料到 fluend GET http://localhost:8888/aha.test1?json={"a":1}
+
+
+## metabase
+
+- docker hub: https://hub.docker.com/r/metabase/metabase
+- ref: https://www.metabase.com/docs/latest/operations-guide/running-metabase-on-docker.html
+
+```shell
+docker-compose -f docker-compose-metabase.yml up -d --remove-orphans
+```
+
+### connect to postgreSQL
+
+```shell
+psql -d meatabase -h localhost -p 5431 -U aha
+```

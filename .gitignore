@@ -1,5 +1,8 @@
+# docker-compose
+secrets
+
 # EFK
-volumn/elasticsearch
+volumn
 
 
 # Byte-compiled / optimized / DLL files
