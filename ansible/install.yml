@@ -1,0 +1,84 @@
+---
+- hosts: servers
+  become: yes
+  vars_files:
+      - vars.yml
+  tasks:
+    - name: check server
+      ping:
+      register: m
+    
+    - name: check user
+      debug:
+        msg: "{{m}}"
+    
+    # https://jiepeng.me/2020/04/22/manual-installation-docker-by-ansible-playbook-on-gce
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: true
+      loop: "{{ requried_packages }}"
+
+    - name: Add docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt cache and install docker engine
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: true
+      loop: "{{ docker_engines }}"        
+
+    - name: Check docker group is exists
+      group:
+        name: docker
+        state: present
+
+    - name: Add user to docker group
+      user:
+        name: "{{ user }}"
+        group: docker
+
+    # https://code-maven.com/install-and-configure-nginx-using-ansible
+    - name: ensure nginx is at the latest version
+      apt: 
+        name: nginx 
+        state: latest
+        update_cache: yes
+
+    - name: start nginx
+      service:
+          name: nginx
+          state: started
+
+    - name: Just get information about the repository whether or not it has already been cloned locally
+      ansible.builtin.git:
+        repo: 'https://github.com/ntuaha/api_python_template.git'
+        dest: "/home/{{user}}/api_python_template"
+        version: dev
+
+    # https://phoenixnap.com/kb/install-docker-compose-on-ubuntu-20-04
+    # https://docs.docker.com/compose/install/
+    - name: install docker-compose
+      get_url: 
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+        dest: "/usr/local/bin/docker-compose"
+        mode: 'u+x,g+x'
+
+    - name: Remove useless packages from the cache
+      apt:
+        autoclean: yes
+
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes
+

@@ -1,0 +1,34 @@
+- hosts: servers
+  become: yes
+
+# https://code-maven.com/install-and-configure-nginx-using-ansible
+  tasks:
+    - name: stop docker
+      service:
+        name: docker
+        state: stopped
+      
+    - name: uninstall docker
+      apt:
+        pkg: docker
+        state: absent
+    
+    - name: ensure docker is not installed 
+      apt:
+        name: docker
+        state: absent
+    
+    - name: stop nginx
+      service:
+        name: nginx
+        state: stopped
+
+    - name: uninstall nginx
+      apt:
+        pkg: docker
+        state: absent
+
+    - name: ensure nginx is not installed
+      apt: 
+        pkg: nginx 
+        state: absent
