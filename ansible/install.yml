@@ -12,90 +12,89 @@
       debug:
         msg: "{{m}}"
     
-    # https://jiepeng.me/2020/04/22/manual-installation-docker-by-ansible-playbook-on-gce
+    - name: install docker
+      block:
+      # https://jiepeng.me/2020/04/22/manual-installation-docker-by-ansible-playbook-on-gce
+      - name: Install required packages
+        apt:
+          name: "{{ item }}"
+          state: latest
+          update_cache: true
+        loop: "{{ requried_packages }}"
 
-    - name: Install required packages
-      apt:
-        name: "{{ item }}"
-        state: latest
-        update_cache: true
-      loop: "{{ requried_packages }}"
+      - name: Add docker's official GPG key
+        apt_key:
+          url: https://download.docker.com/linux/ubuntu/gpg
+          state: present
 
-    - name: Add docker's official GPG key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+      - name: Add docker repository
+        apt_repository:
+          repo: deb https://download.docker.com/linux/ubuntu bionic stable
+          state: present
 
-    - name: Add docker repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu bionic stable
-        state: present
+      - name: Update apt cache and install docker engine
+        apt:
+          name: "{{ item }}"
+          state: latest
+          update_cache: true
+        loop: "{{ docker_engines }}"        
 
-    - name: Update apt cache and install docker engine
-      apt:
-        name: "{{ item }}"
-        state: latest
-        update_cache: true
-      loop: "{{ docker_engines }}"        
+      - name: Check docker group is exists
+        group:
+          name: docker
+          state: present
 
-    - name: Check docker group is exists
-      group:
-        name: docker
-        state: present
+      - name: Add user to docker group
+        user:
+          name: "{{ user }}"
+          group: docker
 
-    - name: Add user to docker group
-      user:
-        name: "{{ user }}"
-        group: docker
+    - name: install nginx
+      block:
+      # https://code-maven.com/install-and-configure-nginx-using-ansible
+      - name: ensure nginx is at the latest version
+        apt: 
+          name: nginx 
+          state: latest
+          update_cache: yes
 
-    # https://code-maven.com/install-and-configure-nginx-using-ansible
-    - name: ensure nginx is at the latest version
-      apt: 
-        name: nginx 
-        state: latest
-        update_cache: yes
+      - name: start nginx
+        service:
+            name: nginx
+            state: started
 
-    - name: start nginx
-      service:
-          name: nginx
-          state: started
-
-    - name: Just get information about the repository whether or not it has already been cloned locally
-      ansible.builtin.git:
-        repo: 'https://github.com/ntuaha/api_python_template.git'
-        dest: "/home/{{user}}/api_python_template"
-        version: dev
-
-    # https://phoenixnap.com/kb/install-docker-compose-on-ubuntu-20-04
-    # https://docs.docker.com/compose/install/
     - name: install docker-compose
-      get_url: 
-        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
-        dest: "/usr/local/bin/docker-compose"
+      block:
+      # https://phoenixnap.com/kb/install-docker-compose-on-ubuntu-20-04
+      # https://docs.docker.com/compose/install/
+      - name: install docker-compose
+        get_url: 
+          url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+          dest: "/usr/local/bin/docker-compose"
 
-    - name: add execute permission
-      shell: |
-        chmod +x /usr/local/bin/docker-compose
+      - name: add execute permission
+        shell: |
+          chmod +x /usr/local/bin/docker-compose
 
-    # build soft link
-    # https://stackoverflow.com/questions/27006925/how-to-replace-a-directory-with-a-symlink-using-ansible
-    - name: remove the link
-      file: 
-        path: /usr/bin/docker-compose 
-        state: absent 
+      # build soft link
+      # https://stackoverflow.com/questions/27006925/how-to-replace-a-directory-with-a-symlink-using-ansible
+      - name: remove the link
+        file: 
+          path: /usr/bin/docker-compose 
+          state: absent 
 
-    - name: setup docker-compose symlink
-      file: 
-        src: /usr/local/bin/docker-compose
-        path: /usr/bin/docker-compose          
-        state: link 
-        force: yes
+      - name: setup docker-compose symlink
+        file: 
+          src: /usr/local/bin/docker-compose
+          path: /usr/bin/docker-compose          
+          state: link 
+          force: yes
 
-    # https://docs.docker.com/compose/completion/
-    - name: install docker-compose completion
-      get_url:
-        url: "https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/bash/docker-compose"
-        dest: "/etc/bash_completion.d/docker-compose"
+      # https://docs.docker.com/compose/completion/
+      - name: install docker-compose completion
+        get_url:
+          url: "https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/bash/docker-compose"
+          dest: "/etc/bash_completion.d/docker-compose"
 
     - name: Remove useless packages from the cache
       apt:
@@ -104,4 +103,25 @@
     - name: Remove dependencies that are no longer required
       apt:
         autoremove: yes
+
+    - name: start EFK
+      block: 
+        - name: Just get information about the repository whether or not it has already been cloned locally
+          ansible.builtin.git:
+            repo: 'https://github.com/ntuaha/api_python_template.git'
+            dest: "/home/{{user}}/api_python_template"
+            version: dev
+
+        - name: mkdir volumn for docker-compose
+          file:
+            path: /home/{{user}}/api_python_template/volumn/elasticsearch
+            state: directory
+            recurse: yes
+
+        - name: run docker-compose
+          shell: |
+            docker-compose -f docker-compose.yml up -d --remove-orphans
+          args:
+            chdir: /home/{{user}}/api_python_template
+      become: no
 
