@@ -73,3 +73,11 @@ docker-compose -f docker-compose-metabase.yml up -d --remove-orphans
 ```shell
 psql -d meatabase -h localhost -p 5431 -U aha
 ```
+
+## 遠端安裝
+
+透過 ansible-playbook
+
+```shell
+ansible-playbook -i inventory install.yml
+```
