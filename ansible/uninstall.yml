@@ -3,6 +3,13 @@
 
 # https://code-maven.com/install-and-configure-nginx-using-ansible
   tasks:
+    - name: remove docker-compose
+      shell: |
+        rm $(which docker-compose)
+#      apt:
+#        pkg: docker-compose
+#        state: absent
+
     - name: stop docker
       service:
         name: docker

@@ -4,7 +4,7 @@ requried_packages:
   - curl
   - gnupg-agent
   - software-properties-common
-  - docker-compose
+  # - docker-compose
 
 docker_engines:
   - docker-ce

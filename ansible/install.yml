@@ -72,7 +72,30 @@
       get_url: 
         url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
         dest: "/usr/local/bin/docker-compose"
-        mode: 'u+x,g+x'
+
+    - name: add execute permission
+      shell: |
+        chmod +x /usr/local/bin/docker-compose
+
+    # build soft link
+    # https://stackoverflow.com/questions/27006925/how-to-replace-a-directory-with-a-symlink-using-ansible
+    - name: remove the link
+      file: 
+        path: /usr/bin/docker-compose 
+        state: absent 
+
+    - name: setup docker-compose symlink
+      file: 
+        src: /usr/local/bin/docker-compose
+        path: /usr/bin/docker-compose          
+        state: link 
+        force: yes
+
+    # https://docs.docker.com/compose/completion/
+    - name: install docker-compose completion
+      get_url:
+        url: "https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/bash/docker-compose"
+        dest: "/etc/bash_completion.d/docker-compose"
 
     - name: Remove useless packages from the cache
       apt:
