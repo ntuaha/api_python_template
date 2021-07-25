@@ -96,8 +96,3 @@ grafana/grafana:8.0.6-ubuntu
 ## 新增 User and sudo
 
 [參考資料](http://note.drx.tw/2008/03/ubuntuadduser-part1.html)
-
-``` shell
-sudo adduser rpauser
-rpa123
-```
