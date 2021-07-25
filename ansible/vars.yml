@@ -15,3 +15,30 @@ user: ntuaha
 
 # https://github.com/docker/compose/releases
 docker_compose_version: 1.29.2
+
+ppa_repo:
+  - "ppa:nginx/stable"
+  - "ppa:deadsnakes/ppa"
+
+apt_python39:
+  - python3.9
+  - python3.9-distutils
+
+pip:
+  - pip
+  - fastapi
+  - uvicorn
+  - orjson
+  - requests
+  - ujson
+  - email_validator
+  - aiofiles
+  - jinja2
+  - python-multipart
+  - itsdangerous
+  - pyyaml
+  - graphene
+  - pytest
+  - numpy 
+  - pandas
+  - jupyterlab

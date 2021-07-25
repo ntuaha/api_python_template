@@ -1,0 +1,61 @@
+---
+- hosts: servers
+#  become: yes
+  vars_files:
+      - vars.yml
+  tasks:
+
+
+    - name: build env
+    # https://linuxize.com/post/how-to-install-python-3-9-on-ubuntu-20-04/
+      block:
+      - name: setup env
+        apt:
+          name: "{{ item }}"
+          state: latest
+          update_cache: true
+        loop: "{{ requried_packages }}"
+      - name: add ppa
+        apt_repository:
+          repo: "{{ item }}"
+          state: present
+        loop: "{{ ppa_repo }}"
+      become: yes
+
+    - name: python packages
+      block:
+      - name: install python3 packages
+      # https://stackoverflow.com/questions/47632103/ansible-how-to-pip-install-with-upgrade
+        pip:
+          name: "{{ item }}"
+          state: forcereinstall
+          extra_args: --ignore-installed
+        loop: "{{ pip }}"
+      become: yes
+
+
+    - name: install nginx
+      block:
+        # https://code-maven.com/install-and-configure-nginx-using-ansible
+        - name: ensure nginx is at the latest version
+          apt: 
+            name: nginx 
+            state: latest
+            update_cache: yes
+
+        - name: start nginx
+          service:
+              name: nginx
+              state: started
+      become: yes
+
+
+    - name: finall, clean all useless files
+      block:
+        - name: Remove useless packages from the cache
+          apt:
+            autoclean: yes
+        - name: Remove dependencies that are no longer required
+          apt:
+            autoremove: yes
+      become: yes

@@ -2,6 +2,7 @@ version: "3.9"
 services:
   elasticsearch:
     image: elasticsearch:7.13.3
+    container_name: elasticsearch
     volumes:
       - type: bind
         source: ./config/elasticsearch.yml
@@ -21,6 +22,7 @@ services:
       - service
   fluentd:
     image: yowko/fluentd-elasticsearch:1.0.0
+    container_name: fluentd
     volumes:
       - type: bind
         source: ./config/fluent.conf
@@ -35,6 +37,7 @@ services:
       - elasticsearch
   kibana:
     image: kibana:7.13.3
+    container_name: kibana
     volumes:
       - type: bind
         source: ./config/kibana.yml
@@ -83,6 +86,15 @@ services:
     secrets:
       - db_password
       - db_user
+  grafana:
+    image: grafana/grafana:8.0.6-ubuntu
+    ports:
+      - 3123:3000
+    container_name: grafana
+    environment: 
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,frser-sqlite-datasource,petrslavotinek-carpetplot-panel
+    networks:
+      - service
 secrets:
   db_password:
     file: ./secrets/db_password.txt

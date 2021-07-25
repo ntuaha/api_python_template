@@ -81,3 +81,23 @@ psql -d meatabase -h localhost -p 5431 -U aha
 ```shell
 ansible-playbook -i inventory install.yml
 ```
+
+建立有 python, docker, docker-compose, nginx
+```shell
+ansible-playbook -i azure-test install.yml
+```
+
+
+## 自建 granfana
+
+[參考資料](https://grafana.com/docs/grafana/latest/installation/docker/)
+grafana/grafana:8.0.6-ubuntu
+
+## 新增 User and sudo
+
+[參考資料](http://note.drx.tw/2008/03/ubuntuadduser-part1.html)
+
+``` shell
+sudo adduser rpauser
+rpa123
+```

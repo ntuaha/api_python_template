@@ -1,5 +1,10 @@
 # docker-compose
 secrets
+.DS_Store
+
+# inventory
+ansible/azure*
+inventory
 
 # EFK
 volumn

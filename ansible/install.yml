@@ -11,7 +11,20 @@
     - name: check user
       debug:
         msg: "{{m}}"
-    
+
+
+    - name: python packages
+      block:
+      - name: install python3 packages
+      # https://stackoverflow.com/questions/47632103/ansible-how-to-pip-install-with-upgrade
+        pip:
+          name: "{{ item }}"
+          state: forcereinstall
+          extra_args: --ignore-installed
+        loop: "{{ pip }}"
+      become: yes   
+
+
     - name: install docker
       block:
       # https://jiepeng.me/2020/04/22/manual-installation-docker-by-ansible-playbook-on-gce
@@ -48,6 +61,7 @@
         user:
           name: "{{ user }}"
           group: docker
+
 
     - name: install nginx
       block:
@@ -96,13 +110,18 @@
           url: "https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/bash/docker-compose"
           dest: "/etc/bash_completion.d/docker-compose"
 
-    - name: Remove useless packages from the cache
-      apt:
-        autoclean: yes
 
-    - name: Remove dependencies that are no longer required
-      apt:
-        autoremove: yes
+    - name: clean
+      block:
+      - name: Remove useless packages from the cache
+        apt:
+          autoclean: yes
+
+      - name: Remove dependencies that are no longer required
+        apt:
+          autoremove: yes
+      become: yes
+
 
     - name: start EFK
       block: 
@@ -120,6 +139,7 @@
 
         - name: run docker-compose
           shell: |
+            docker-compose down
             docker-compose -f docker-compose.yml up -d --remove-orphans
           args:
             chdir: /home/{{user}}/api_python_template
